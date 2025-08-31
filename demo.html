@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartEdu Demo – AI-Powered Student Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Navigation */
+        nav {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(15px);
+            padding: 1rem 0;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        nav .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #4b5563;
+            font-weight: 500;
+            font-size: 0.95rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: #3b82f6;
+            background: rgba(59, 130, 246, 0.08);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-links a:hover::after {
+            width: 80%;
+        }
+
+        /* Mobile Menu */
+        .mobile-menu-btn {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            padding: 0.5rem;
+            border: none;
+            background: none;
+            gap: 4px;
+        }
+
+        .mobile-menu-btn span {
+            width: 25px;
+            height: 3px;
+            background: #4b5563;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-menu-btn.active span:nth-child(1) {
+            transform: rotate(45deg) translate(6px, 6px);
+        }
+
+        .mobile-menu-btn.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .mobile-menu-btn.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(6px, -6px);
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: flex;
+            }
+
+            .nav-links {
+                position: fixed;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: rgba(255, 255, 255, 0.98);
+                backdrop-filter: blur(15px);
+                flex-direction: column;
+                gap: 0;
+                padding: 1rem 0;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+                transform: translateY(-100%);
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s ease;
+            }
+
+            .nav-links.active {
+                transform: translateY(0);
+                opacity: 1;
+                visibility: visible;
+            }
+
+            .nav-links a {
+                width: 100%;
+                text-align: center;
+                padding: 1rem 2rem;
+                border-radius: 0;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            }
+
+            .nav-links a:last-child {
+                border-bottom: none;
+            }
+
+            .nav-links a::after {
+                display: none;
+            }
+        }
+
+        /* Demo Header */
+        .demo-header {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            color: white;
+            padding: 3rem 0;
+            text-align: center;
+        }
+
+        .demo-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .demo-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        /* Demo Grid */
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2rem;
+            padding: 3rem 0;
+        }
+
+        .demo-panel {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .panel-header {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            color: white;
+            padding: 1.2rem 1.5rem;
+            font-weight: 600;
+            box-shadow: 0 2px 10px rgba(59, 130, 246, 0.2);
+        }
+
+        .panel-content {
+            padding: 1.5rem;
+        }
+
+        /* Notes Summary & Mind Map */
+        .notes-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .summary-box {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #6366f1;
+        }
+
+        .mind-map-placeholder {
+            background: #f0f9ff;
+            border: 2px dashed #6366f1;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            color: #6366f1;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Chat Bubbles */
+        .chat-container {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .chat-bubble {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .chat-bubble.user {
+            flex-direction: row-reverse;
+        }
+
+        .chat-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .chat-avatar.user {
+            background: #6366f1;
+        }
+
+        .chat-avatar.ai {
+            background: #10b981;
+        }
+
+        .chat-message {
+            background: #f1f5f9;
+            padding: 0.75rem 1rem;
+            border-radius: 18px;
+            max-width: 70%;
+        }
+
+        .chat-bubble.user .chat-message {
+            background: #6366f1;
+            color: white;
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .chat-input button {
+            padding: 0.75rem 1rem;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .chat-input button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        /* Homework Helper */
+        .helper-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .tab-button {
+            padding: 0.5rem 1rem;
+            background: #f1f5f9;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .tab-button.active {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            color: white;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .helper-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-family: inherit;
+        }
+
+        .helper-result {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        /* Voice Transcription */
+        .transcription-sample {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            font-style: italic;
+        }
+
+        .summary-highlights {
+            background: #fef3c7;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .highlight-item {
+            margin-bottom: 0.5rem;
+            padding-left: 1rem;
+            border-left: 3px solid #f59e0b;
+        }
+
+        /* Exam Prep Quiz */
+        .quiz-question {
+            margin-bottom: 1.5rem;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .quiz-option input[type="radio"] {
+            cursor: not-allowed;
+        }
+
+        .quiz-submit {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 1rem;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .quiz-submit:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        /* Collaboration */
+        .collab-message {
+            background: #f1f5f9;
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .message-author {
+            font-weight: 600;
+            color: #6366f1;
+        }
+
+        .message-time {
+            color: #6b7280;
+            font-size: 0.8rem;
+        }
+
+        .moderation-tag {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-left: 0.5rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .demo-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .notes-section {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .nav-links {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .panel-content {
+                padding: 1rem;
+            }
+            
+            .helper-tabs {
+                flex-wrap: wrap;
+            }
+            
+            .tab-button {
+                flex: 1;
+                min-width: 80px;
+            }
+            
+            .chat-message {
+                max-width: 85%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .demo-header h1 {
+                font-size: 2rem;
+            }
+            
+            .demo-header p {
+                font-size: 1rem;
+            }
+            
+            .container {
+                padding: 0 15px;
+            }
+            
+            .panel-header {
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+            }
+            
+            .panel-content {
+                padding: 0.75rem;
+            }
+            
+            .chat-input {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .chat-input button {
+                width: 100%;
+            }
+            
+            .helper-tabs {
+                flex-direction: column;
+            }
+            
+            .tab-button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="container">
+            <div class="logo">SmartEdu</div>
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <div class="nav-links" id="navLinks">
+                <a href="index.html">Home</a>
+                <a href="demo.html">Demo</a>
+                <a href="tech.html">Technology</a>
+            </div>
+        </div>
+    </nav>
+
+    <script>
+        function toggleMobileMenu() {
+            const navLinks = document.getElementById('navLinks');
+            const mobileBtn = document.querySelector('.mobile-menu-btn');
+            navLinks.classList.toggle('active');
+            mobileBtn.classList.toggle('active');
+        }
+    </script>
+
+    <!-- Demo Header -->
+    <section class="demo-header">
+        <div class="container">
+            <h1>SmartEdu Demo</h1>
+            <p>Experience the power of AI-assisted learning</p>
+        </div>
+    </section>
+
+    <!-- Demo Panels -->
+    <div class="container">
+        <div class="demo-grid">
+            <!-- Notes Summary & Mind Map -->
+            <div class="demo-panel">
+                <div class="panel-header">📝 Notes Summary & Mind Map</div>
+                <div class="panel-content">
+                    <div class="notes-section">
+                                                 <div>
+                             <h4>AI Summary</h4>
+                             <div class="summary-box">
+                                 <p><strong>Key Concepts:</strong> Neural Networks, Backpropagation, Gradient Descent</p>
+                                 <p><strong>Main Points:</strong></p>
+                                 <ul style="margin-left: 1rem;">
+                                     <li>Neural networks use layers of neurons</li>
+                                     <li>Backpropagation updates weights</li>
+                                     <li>Gradient descent minimizes loss function</li>
+                                 </ul>
+                             </div>
+                         </div>
+                         <div>
+                             <h4>Algorithm Flow</h4>
+                             <div class="mind-map-placeholder">
+                                 <div>
+                                     <p>🤖 Neural Network</p>
+                                     <p>↓</p>
+                                     <p>📊 Input → 🧠 Hidden Layers → 🎯 Output</p>
+                                 </div>
+                             </div>
+                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q&A Chat -->
+            <div class="demo-panel">
+                <div class="panel-header">💬 AI Chat Assistant</div>
+                <div class="panel-content">
+                    <div class="chat-container">
+                                                 <div class="chat-bubble">
+                             <div class="chat-avatar ai">AI</div>
+                             <div class="chat-message">Hello! I'm here to help with your machine learning code. What would you like to know about neural networks?</div>
+                         </div>
+                         <div class="chat-bubble user">
+                             <div class="chat-avatar user">You</div>
+                             <div class="chat-message">What's the difference between gradient descent and stochastic gradient descent?</div>
+                         </div>
+                         <div class="chat-bubble">
+                             <div class="chat-avatar ai">AI</div>
+                             <div class="chat-message">Great question! Gradient descent uses the entire dataset to compute gradients, while SGD uses a single sample or mini-batch, making it faster and more suitable for large datasets.</div>
+                         </div>
+                    </div>
+                    <div class="chat-input">
+                        <input type="text" placeholder="Ask a question about your notes..." alt="Chat input field">
+                        <button>Send</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Homework Helper -->
+            <div class="demo-panel">
+                <div class="panel-header">✍️ Homework Helper</div>
+                <div class="panel-content">
+                                         <div class="helper-tabs">
+                         <button class="tab-button active">Code Review</button>
+                         <button class="tab-button">Optimization</button>
+                         <button class="tab-button">Debug</button>
+                     </div>
+                    
+                                         <div class="tab-content active">
+                         <textarea class="helper-input" placeholder="Paste your ML code here for review..." rows="4" alt="Code review input"></textarea>
+                         <div class="helper-result">
+                             <strong>Code Review Results:</strong>
+                             <ul style="margin-top: 0.5rem; margin-left: 1rem;">
+                                 <li>✅ Code structure looks good</li>
+                                 <li>💡 Consider adding regularization to prevent overfitting</li>
+                                 <li>🔧 Use batch normalization for better training stability</li>
+                             </ul>
+                         </div>
+                     </div>
+                    
+                                         <div class="tab-content">
+                         <textarea class="helper-input" placeholder="Paste your ML code here for optimization..." rows="4" alt="Optimization input"></textarea>
+                         <div class="helper-result">
+                             <strong>Optimization Results:</strong>
+                             <p>📊 Performance Score: 87%</p>
+                             <p>💡 Suggestions: Use vectorization, reduce memory usage</p>
+                             <p>⚡ Potential speedup: 2.3x faster execution</p>
+                         </div>
+                     </div>
+                    
+                                         <div class="tab-content">
+                         <input type="text" class="helper-input" placeholder="Enter ML problem (e.g., ValueError in training)" alt="Debug input">
+                         <div class="helper-result">
+                             <strong>Debug Results:</strong>
+                             <p>🐛 Error: Shape mismatch in layer 2</p>
+                             <p>🔧 Fix: Reshape input to (batch_size, features)</p>
+                             <p>✅ Expected shape: (32, 128)</p>
+                         </div>
+                     </div>
+                </div>
+            </div>
+
+            <!-- Voice Transcription -->
+            <div class="demo-panel">
+                <div class="panel-header">🎤 Voice Transcription</div>
+                <div class="panel-content">
+                                         <div class="transcription-sample">
+                         "Today we're discussing neural networks, the fundamental building blocks of deep learning. We'll cover forward propagation, backpropagation, and how gradient descent optimizes the network weights..."
+                     </div>
+                     <h4>AI Summary</h4>
+                     <div class="summary-highlights">
+                         <div class="highlight-item">
+                             <strong>Main Topic:</strong> Neural Networks fundamentals
+                         </div>
+                         <div class="highlight-item">
+                             <strong>Key Concepts:</strong> Forward/Backward propagation, Gradient descent
+                         </div>
+                         <div class="highlight-item">
+                             <strong>Importance:</strong> Core of deep learning systems
+                         </div>
+                     </div>
+                </div>
+            </div>
+
+            <!-- Exam Prep Quiz -->
+            <div class="demo-panel">
+                <div class="panel-header">📚 Exam Preparation</div>
+                <div class="panel-content">
+                                         <div class="quiz-question">
+                         <h4>Question 1:</h4>
+                         <p>What is the primary activation function used in neural networks for hidden layers?</p>
+                         <div class="quiz-options">
+                             <label class="quiz-option">
+                                 <input type="radio" name="q1" disabled>
+                                 <span>Linear</span>
+                             </label>
+                             <label class="quiz-option">
+                                 <input type="radio" name="q1" disabled>
+                                 <span>ReLU</span>
+                             </label>
+                             <label class="quiz-option">
+                                 <input type="radio" name="q1" disabled>
+                                 <span>Sigmoid</span>
+                             </label>
+                             <label class="quiz-option">
+                                 <input type="radio" name="q1" disabled>
+                                 <span>Tanh</span>
+                             </label>
+                         </div>
+                     </div>
+                    <button class="quiz-submit" disabled>Submit Answer (Demo Mode)</button>
+                </div>
+            </div>
+
+            <!-- Collaboration -->
+            <div class="demo-panel">
+                <div class="panel-header">👥 Study Group Collaboration</div>
+                <div class="panel-content">
+                                         <div class="collab-message">
+                         <div class="message-header">
+                             <span class="message-author">Sarah M.</span>
+                             <span class="message-time">2:30 PM</span>
+                         </div>
+                         <p>Does anyone understand the difference between batch normalization and layer normalization?</p>
+                     </div>
+                     <div class="collab-message">
+                         <div class="message-header">
+                             <span class="message-author">Mike R.</span>
+                             <span class="message-time">2:32 PM</span>
+                             <span class="moderation-tag">AI Verified</span>
+                         </div>
+                         <p>Batch norm normalizes across the batch dimension, while layer norm normalizes across features!</p>
+                     </div>
+                     <div class="collab-message">
+                         <div class="message-header">
+                             <span class="message-author">Emma L.</span>
+                             <span class="message-time">2:35 PM</span>
+                         </div>
+                         <p>Thanks Mike! That clarifies the difference.</p>
+                     </div>
+                    <div class="chat-input">
+                        <input type="text" placeholder="Join the discussion..." alt="Collaboration chat input">
+                        <button>Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
